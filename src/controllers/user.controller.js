@@ -4,7 +4,6 @@ import { User } from "../models/user.model.js"
 import { deleteFromCloudnary, uploadOnCloudnary } from "../utils/cloudnary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
-import mongoose from "mongoose"
 
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
@@ -180,7 +179,7 @@ const loginUser = asyncHandler(async (req, res) => {
 })
 
 const logoutUser = asyncHandler(async (req, res) => {
-    await User.findByIdAndUpdate(req.user._id, { $set: { refreshToken: undefined } })
+    await User.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } })
     const options = { // makes cookies secure. i.e., only server can modify them
         httpOnly: true,
         secure: true

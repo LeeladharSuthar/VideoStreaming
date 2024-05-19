@@ -26,14 +26,14 @@ router.route("/changePassword").post(verifyJWT, changeCurrentPassword)
 
 router.route("/getCurrentUser").get(verifyJWT, getCurrentUser)
 
-router.route("/updateUser").post(verifyJWT, updateUser)
+router.route("/updateUser").patch(verifyJWT, updateUser)
 
-router.route("/updateAvatar").post(upload.single("avatar"), verifyJWT, updateAvatar)
+router.route("/updateAvatar").patch(upload.single("avatar"), verifyJWT, updateAvatar)
 
-router.route("/updateCoverImage").post(upload.single("coverImage"), verifyJWT, updateCoverImage)
+router.route("/updateCoverImage").patch(upload.single("coverImage"), verifyJWT, updateCoverImage)
 
-router.route("/getUserChannelProfile/:username").post(verifyJWT, getUserChannelProfile)
+router.route("/getUserChannelProfile/:username").get(verifyJWT, getUserChannelProfile)
 
-router.route("/watchHistory").post(verifyJWT, watchHistory)
+router.route("/watchHistory").get(verifyJWT, watchHistory)
 
 export default router
