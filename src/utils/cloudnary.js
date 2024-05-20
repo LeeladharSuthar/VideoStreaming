@@ -25,7 +25,7 @@ const uploadOnCloudnary = async (file) => {
 
 const deleteFromCloudnary = async (fileUrl) => {
     try {
-        const publicId = fileUrl.substring(fileUrl.lastIndexOf('/')+1, fileUrl.lastIndexOf('.'))
+        const publicId = fileUrl.substring(fileUrl.lastIndexOf('/') + 1, fileUrl.lastIndexOf('.'))
         const result = await cloudinary.uploader.destroy(publicId);
         console.log(result);
         return result
@@ -35,7 +35,19 @@ const deleteFromCloudnary = async (fileUrl) => {
     }
 }
 
-export { uploadOnCloudnary, deleteFromCloudnary }
+const deleteVideoFromCloudnary = async (fileUrl) => {
+    try {
+        const publicId = fileUrl.substring(fileUrl.lastIndexOf('/') + 1, fileUrl.lastIndexOf('.'))
+        const result = await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
+        console.log(result);
+        return result
+    } catch (error) {
+        console.log("Cloudnary error while deleting file", error)
+        return null
+    }
+}
+
+export { uploadOnCloudnary, deleteFromCloudnary, deleteVideoFromCloudnary }
 
 
 // uploadOnCloudnary("https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg")
