@@ -136,7 +136,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: get video by id
     const video = await Video.findById(videoId)
-    if(!video){
+    if (!video) {
         throw new ApiError(400, "Video not present")
     }
     return res.status(200).json(new ApiResponse(200, video, "Successful"))
@@ -144,8 +144,36 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    const { title, description } = req.body
+    const thumbnailPath = req.file?.path || ""
+    let oldUrl = undefined
     //TODO: update video details like title, description, thumbnail
+    const video = await Video.findById(videoId)
+    if (!video) {
+        throw new ApiError(400, "Something went wrong.")
+    }
+    if (title) {
+        video.title = title
+    }
+    if (description) {
+        video.description = description
+    }
+    if (thumbnailPath) {
+        const cloudnaryThumbnail = await uploadOnCloudnary(thumbnailPath)
+        if (!cloudnaryThumbnail) {
+            throw new ApiError(400, "Cloudnary error")
+        }
+        oldUrl = video.thumbnail
+        video.thumbnail = cloudnaryThumbnail.url
+    }
+    await video.save({ validateBeforeSave: false })
 
+    const newVideo = await Video.findById(videoId)
+    if (oldUrl) {
+        await deleteFromCloudnary(oldUrl)
+    }
+
+    return res.status(200).json(new ApiResponse(200, newVideo, "Successful"))
 })
 
 const deleteVideo = asyncHandler(async (req, res) => {
@@ -175,8 +203,18 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    const video = await Video.findById(videoId)
 
+    if(!video.owner.equals(req.user._id)){
+        throw new ApiError(400, "Something went Wrong")
+    }
+    const currentStatus = video.isPublished
+    video.isPublished = !currentStatus
+    video.save({ validateBeforeSave: false })
 
+    const newVideo = await Video.findById(videoId)
+
+    return res.status(200).json(new ApiResponse(200, newVideo, "Successful"))
 })
 
 export {
