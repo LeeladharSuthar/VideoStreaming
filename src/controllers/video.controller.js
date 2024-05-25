@@ -8,8 +8,27 @@ import { deleteFromCloudnary, uploadOnCloudnary, deleteVideoFromCloudnary } from
 
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+    const { page = 1, limit = 10, queryText, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
+    
+    const options = {
+        "sort": { [sortType]: sortBy }, // Sort by ID descending (optional)
+        "limit": limit,
+        "offset": (page - 1) * limit, // Calculate offset for pagination
+        "page": page
+    };
+
+    const query = {
+        title: {
+            $text: { $search: queryText }
+        }
+    };
+
+    const myAggregate = Video.aggregate();
+    const result = await myAggregate.paginateExec(query, options)
+
+    return res.status(200).json(new ApiResponse(200, result, "Successful"))
+
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -205,7 +224,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     const video = await Video.findById(videoId)
 
-    if(!video.owner.equals(req.user._id)){
+    if (!video.owner.equals(req.user._id)) {
         throw new ApiError(400, "Something went Wrong")
     }
     const currentStatus = video.isPublished
