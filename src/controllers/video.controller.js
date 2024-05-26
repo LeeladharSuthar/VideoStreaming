@@ -154,6 +154,9 @@ const publishAVideo = asyncHandler(async (req, res) => {
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: get video by id
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400, "Invalid Id")
+    }
     const video = await Video.findById(videoId)
     if (!video) {
         throw new ApiError(400, "Video not present")
@@ -164,6 +167,11 @@ const getVideoById = asyncHandler(async (req, res) => {
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     const { title, description } = req.body
+
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400, "Invalid Id")
+    }
+
     const thumbnailPath = req.file?.path || ""
     let oldUrl = undefined
     //TODO: update video details like title, description, thumbnail
@@ -198,6 +206,11 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
+
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400, "Invalid Id")
+    }
+
     const video = await Video.findById(videoId)
     if (!video) {
         throw new ApiError(400, "Invalid video")
@@ -223,6 +236,10 @@ const deleteVideo = asyncHandler(async (req, res) => {
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     const video = await Video.findById(videoId)
+
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400, "Invalid Id")
+    }
 
     if (!video.owner.equals(req.user._id)) {
         throw new ApiError(400, "Something went Wrong")

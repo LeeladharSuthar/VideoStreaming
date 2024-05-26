@@ -1,9 +1,12 @@
 import { asyncHandler } from "../utils/asyncHandler.js"
+import mongoose from "mongoose"
 import { ApiError } from "../utils/ApiError.js"
 import { User } from "../models/user.model.js"
 import { deleteFromCloudnary, uploadOnCloudnary } from "../utils/cloudnary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
+
+const { ObjectId } = mongoose.Types;
 
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
@@ -428,7 +431,7 @@ const watchHistory = asyncHandler(async (req, res) => {
     const user = await User.aggregate([
         {
             $match: {
-                _id: req.user._id
+                _id: req.user._id // if doesn't work try => _id : new ObjectId(req.user._id) 
             }
         },
         {

@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 
+const { ObjectId } = mongoose.Types;
 
 const createPlaylist = asyncHandler(async (req, res) => {
     const { name, description } = req.body
@@ -22,13 +23,86 @@ const createPlaylist = asyncHandler(async (req, res) => {
 
 const getUserPlaylists = asyncHandler(async (req, res) => {
     const { userId } = req.params
+    if (!isValidObjectId(userId)) {
+        throw new ApiError(400, "Invalid id")
+    }
     //TODO: get user playlists
+    const result = await Playlist.find({ owner: userId })
+    if (!result) {
+        throw new ApiError(400, "Hello")
+    }
+    return res.status(200).json(new ApiResponse(200, result, "Successful"))
 })
 
 const getPlaylistById = asyncHandler(async (req, res) => {
     const { playlistId } = req.params
     //TODO: get playlist by id
-    
+    if (!isValidObjectId(playlistId)) {
+        throw new ApiError(400, "Invalid Id")
+    }
+
+    const result = await Playlist.aggregate([
+        {
+            $match: {
+                "_id": new ObjectId(playlistId)
+            }
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "videos",
+                foreignField: "_id",
+                as: "result",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullname: 1,
+                                        username: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $project: {
+                            thumbnail: 1,
+                            title: 1,
+                            decription: 1,
+                            duration: 1,
+                            views: 1,
+                            owner: 1
+                        }
+                    },
+                    {
+                        $addFields: {
+                            owner: {
+                                // $ arrayElemAt: ["$owner", 1]
+                                $first: "$owner"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $project: {
+                name: 1,
+                description: 1,
+                owner: 1,
+                result: 1
+            }
+        }
+    ])
+
+    return res.status(200).json(new ApiResponse(200, result, "Successfuls"))
 })
 
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
@@ -51,14 +125,14 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     if (!playlist.owner.equals(req.user._id)) {
         throw new ApiError(400, "Unauthorized Access")
     }
-    if(playlist.videos.includes(videoId)){
+    if (playlist.videos.includes(videoId)) {
         throw new ApiError(400, "Something went wrong")
     }
     playlist.videos.push(videoId)
 
     const temp = await playlist.save({ validateBeforeSave: true })
 
-    if(!temp){
+    if (!temp) {
         throw new ApiError(400, "Something went  wrong")
     }
 
@@ -92,7 +166,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
 
     const temp = await playlist.save({ validateBeforeSave: true })
 
-    if(!temp){
+    if (!temp) {
         throw new ApiError(400, "Something went  wrong")
     }
 
