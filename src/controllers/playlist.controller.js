@@ -28,9 +28,6 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     }
     //TODO: get user playlists
     const result = await Playlist.find({ owner: userId })
-    if (!result) {
-        throw new ApiError(400, "Hello")
-    }
     return res.status(200).json(new ApiResponse(200, result, "Successful"))
 })
 
@@ -133,7 +130,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     const temp = await playlist.save({ validateBeforeSave: true })
 
     if (!temp) {
-        throw new ApiError(400, "Something went  wrong")
+        throw new ApiError(400, "Something went wrong while adding video to playlist")
     }
 
     const updatedPlaylist = await Playlist.findById(playlistId)
@@ -167,7 +164,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const temp = await playlist.save({ validateBeforeSave: true })
 
     if (!temp) {
-        throw new ApiError(400, "Something went  wrong")
+        throw new ApiError(400, "Something went wrong while removing video from playlist")
     }
 
     const updatedPlaylist = await Playlist.findById(playlistId)

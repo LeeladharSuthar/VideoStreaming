@@ -30,7 +30,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
         if (result.acknowledged) {
             return res.status(200).json(new ApiResponse(200, result, "dislike successful"))
         }
-        throw new ApiError(400, "Somrthing went wrong")
+        throw new ApiError(400, "Somrthing went wrong while disliking video")
     }
 
     let result = await Like.create({
@@ -64,7 +64,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
         if (result.acknowledged) {
             return res.status(200).json(new ApiResponse(200, result, "dislike successful"))
         }
-        throw new ApiError(400, "Something went wrong")
+        throw new ApiError(400, "Something went wrong while disliking comment")
     }
 
     let result = await Comment.create({
@@ -81,7 +81,7 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     if (!isValidObjectId(tweetId)) {
         throw new ApiError(400, "Invalid Id")
     }
-    const tweet = await Comment.findById(tweetId)
+    const tweet = await Tweet.findById(tweetId)
     if (!tweet) {
         throw new ApiError(400, "Tweet not found")
     }
@@ -91,14 +91,14 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     })
 
     if (status.length != 0) {
-        let result = await Comment.deleteOne({
+        let result = await Tweet.deleteOne({
             likedBy: req.user._id,
             tweet: tweet._id
         })
         if (result.acknowledged) {
             return res.status(200).json(new ApiResponse(200, result, "dislike successful"))
         }
-        throw new ApiError(400, "Something went wrong")
+        throw new ApiError(400, "Something went wrong while disliking tweet")
     }
 
     let result = await Tweet.create({

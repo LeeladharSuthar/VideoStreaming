@@ -177,7 +177,7 @@ const updateVideo = asyncHandler(async (req, res) => {
     //TODO: update video details like title, description, thumbnail
     const video = await Video.findById(videoId)
     if (!video) {
-        throw new ApiError(400, "Something went wrong.")
+        throw new ApiError(400, "Video not found")
     }
     if (title) {
         video.title = title
@@ -219,7 +219,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
     // console.log(video.owner.equals(userId))
     if (!video.owner.equals(userId)) {
-        throw new ApiError(400, "Invalid owner")
+        throw new ApiError(400, "Unauthorized access")
     }
 
     const cloudnaryVideoId = video.videoFile
@@ -242,7 +242,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     }
 
     if (!video.owner.equals(req.user._id)) {
-        throw new ApiError(400, "Something went Wrong")
+        throw new ApiError(400, "Unauthorized access")
     }
     const currentStatus = video.isPublished
     video.isPublished = !currentStatus
