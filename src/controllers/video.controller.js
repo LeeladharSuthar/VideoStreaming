@@ -24,6 +24,12 @@ const getAllVideos = asyncHandler(async (req, res) => {
         }
     };
 
+    const tempResult = await Video.aggregatePaginate([
+        {
+            
+        }
+    ])
+
     const myAggregate = Video.aggregate();
     const result = await myAggregate.paginateExec(query, options)
 

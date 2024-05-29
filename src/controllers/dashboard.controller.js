@@ -118,7 +118,6 @@ const getChannelVideos = asyncHandler(async (req, res) => {
             }
         }
     ])
-    console.log(result)
     return res.status(200).json(new ApiResponse(200, result, "Successful"))
 })
 
